@@ -1,5 +1,6 @@
 class Biblioteca:
     def __init__(self):
+        print(f"[DEBUG] Usando objeto da classe: {self.__class__}")
         self.usuarios = ['admin']
         self.senhas = ['admin']
         self.bibliotecas = {'admin': []}

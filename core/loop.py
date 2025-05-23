@@ -3,12 +3,10 @@ import time
 
 from core.auth import login_ou_cadastro, carregar_usuarios, salvar_usuarios
 from core.defs import livros_por_genero, menu_usuario, salvar_dados, menu_admin
+from models.sistema import Sistema
 
 def iniciar_programa():
-    dados = carregar_usuarios()
-    usuarios = dados.get('usuarios', [])
-    senhas = dados.get('senhas', {})
-    bibliotecas = dados.get('bibliotecas', {})
+    sistema = Sistema()
 
     while True:
         while True:
@@ -17,36 +15,22 @@ def iniciar_programa():
             if acao == 'login':
                 usuario = input("Usuário: ").strip()
                 senha = input("Senha: ").strip()
-
-                if usuario in usuarios and senhas.get(usuario) == senha:
-                    print(f"Bem-vindo, {usuario}!")
-                    if usuario == 'admin':
-                        # chama função menu_admin() ou o que for para admin
+                usuario_logado = sistema.login(usuario, senha)
+                if usuario_logado:
+                    print(f"Bem-vindo, {usuario_logado.nome}!")
+                    if usuario_logado.nome == 'admin':
                         menu_admin()
                     else:
-                        # chama função menu_usuario(usuario) ou fluxo do usuário normal
-                        menu_usuario(usuario)
+                        menu_usuario(usuario_logado.nome)
                     break
                 else:
                     print("Usuário ou senha incorretos.")
 
             elif acao == 'cadastro':
                 usuario = input("Escolha um nome de usuário: ").strip()
-                if usuario in usuarios:
-                    print("Usuário já existe.")
-                    continue
                 senha = input("Escolha uma senha: ").strip()
-                usuarios.append(usuario)
-                senhas[usuario] = senha
-                bibliotecas[usuario] = []
-
-                dados = {
-                    'usuarios': usuarios,
-                    'senhas': senhas,
-                    'bibliotecas': bibliotecas
-                }
-                salvar_usuarios(dados)
-                print("Cadastro realizado com sucesso!")
+                sucesso, msg = sistema.cadastro(usuario, senha)
+                print(msg)
             else:
                 print("Opção inválida.")
 

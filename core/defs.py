@@ -319,22 +319,67 @@ def menu_admin():
 def menu_usuario(usuario):
     while True:
         print("Olá", usuario, "Seja bem vindo.\n")
-        menu = input("Escolha o que quer: \n1) Buscar novos livros \n2) Sua bibliotéca \n3) Alterar sua conta \n4) Sair do conta\n")
+        menu = input("Escolha o que quer: \n1) Adicionar livros à sua biblioteca \n2) Sua biblioteca (ver, ler, excluir livros) \n3) Alterar sua conta \n4) Sair do conta\n")
         print(35*"-=")
         os.system('cls')
 
+        # Carrega dados atuais do arquivo JSON
+        dados = carregar_usuarios()
+
+        # Garante que o usuário exista no dicionário de bibliotecas
+        if usuario not in dados['bibliotecas']:
+            dados['bibliotecas'][usuario] = []
+
+        biblioteca_pessoal = dados['bibliotecas'][usuario]
+
         if menu == "1":
-            buscar_novos_livros(usuario)
+            # Adicionar livros na biblioteca
+            adicionar_livro_menu(biblioteca_pessoal, dados)
+            salvar_usuarios(dados)
         elif menu == "2":
-            biblioteca_usuario_menu(usuario)
+            # Ver, ler e excluir livros da biblioteca
+            biblioteca_usuario_menu(biblioteca_pessoal, livros)
+            salvar_usuarios(dados)
         elif menu == "3":
-            alterar_conta(usuario)
+            novo_usuario = alterar_conta(dados['usuarios'], dados['senhas'], usuario)
+            if novo_usuario != usuario:
+                # Atualiza o nome de usuário no dicionário de bibliotecas
+                dados['bibliotecas'][novo_usuario] = dados['bibliotecas'].pop(usuario)
+                usuario = novo_usuario
+            salvar_usuarios(dados)
         elif menu == "4":
             saindo()
             break
         else:
             print("Escolha uma das opções válidas (1-4)")
-            
+            time.sleep(2)
+        os.system('cls')
 
+def adicionar_livro_menu(biblioteca_pessoal, dados):
+    # Livros disponíveis para adicionar = todos os livros cadastrados menos os que já estão na biblioteca pessoal
+    livros_disponiveis = [livro for livro in livros if livro not in biblioteca_pessoal]
+    if not livros_disponiveis:
+        print("Nenhum livro novo para adicionar.")
+        time.sleep(2)
+        return
 
-# Implemente as funções buscar_novos_livros, biblioteca_usuario_menu e alterar_conta conforme seu código original.
+    print("Livros disponíveis para adicionar:")
+    for idx, livro in enumerate(livros_disponiveis, 1):
+        print(f"{idx} - {livro}")
+
+    escolha_livro = input("Digite o número do livro para adicionar (ou 0 para voltar): ")
+    if escolha_livro.isdigit():
+        escolha_livro = int(escolha_livro)
+        if escolha_livro == 0:
+            return
+        if 1 <= escolha_livro <= len(livros_disponiveis):
+            livro_escolhido = livros_disponiveis[escolha_livro - 1]
+            biblioteca_pessoal.append(livro_escolhido)
+            print(f"Livro '{livro_escolhido}' adicionado com sucesso.")
+            time.sleep(2)
+        else:
+            print("Opção inválida.")
+            time.sleep(2)
+    else:
+        print("Entrada inválida.")
+        time.sleep(2)

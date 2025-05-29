@@ -5,7 +5,7 @@ import json
 from core.db import livros, generos, usuarios, senhas, bibliotecas
 
 CAMINHO_USUARIOS = "db/usuarios.json"
-caminho_livros = "db/livros.json"
+CAMINHO_LIVROS = "db/livros.json"
 
 def voltando():
     time.sleep(1)
@@ -119,7 +119,7 @@ def livros_cadastrados_menu():
                 if 0 <= posicao < len(livros):
                     print("\nQuando quiser sair deste livro, apenas precione qualquer tecla.")
                     print(35*"-=")
-                    print(f"\n\n\n                                         {livros[posicao]}.\n")
+                    print(f"\n\n\n                                         {livros[posicao]['titulo']}.\n")
                     texto()
                     input('')
                     voltando()
@@ -138,61 +138,94 @@ def livros_cadastrados_menu():
 def usuarios_cadastrados_menu():
     os.system('cls')
     while True:
-        if len(usuarios) <= 1 or not usuarios[1]:
-            mostrar_usuarios()
+        try:
+            with open('db/usuarios.json', 'r') as f:
+                dados = json.load(f)
+                usuarios = dados.get("usuarios", [])
+                senhas = dados.get("senhas", {})
+                bibliotecas = dados.get("bibliotecas", {})
+        except FileNotFoundError:
+            print("Nenhum usuário cadastrado.")
+            voltando()
+            break
+
+        usuarios_sem_admin = [user for user in usuarios if user != "admin"]
+
+        if not usuarios_sem_admin:
+            print("Nenhum usuário cadastrado (além do admin).")
+            voltando()
+            break
+
+        print("\nUsuários cadastrados:")
+        for i, usuario in enumerate(usuarios_sem_admin, 1):
+            print(f"{i} - {usuario}")
+
+        menu_usuarios = input("\n1) Excluir um usuário \n2) Visualizar biblioteca de usuário \n3) Voltar\n")
+        if menu_usuarios == '1':
+            os.system('cls')
+            print("\nUsuários cadastrados:")
+            for i, usuario in enumerate(usuarios_sem_admin, 1):
+                print(f"{i} - {usuario}")
+
+            try:
+                usuario_escolha = int(input("\nEscolha o número do usuário para excluir. \nOu aperte qualquer tecla para voltar.\n"))
+                if 1 <= usuario_escolha <= len(usuarios_sem_admin):
+                    usuario_removido = usuarios_sem_admin[usuario_escolha - 1]
+
+                    print(f"\nVocê tem certeza que deseja excluir o usuário '{usuario_removido}'?")
+                    print("Este usuário irá perder toda sua biblioteca!")
+
+                    confirmacao = input("\n1 - Sim\n2 - Não\nEscolha: ")
+                    if confirmacao == '1':
+                        usuarios.remove(usuario_removido)
+                        senhas.pop(usuario_removido, None)
+                        bibliotecas.pop(usuario_removido, None)
+
+                        dados["usuarios"] = usuarios
+                        dados["senhas"] = senhas
+                        dados["bibliotecas"] = bibliotecas
+
+                        with open('db/usuarios.json', 'w') as f:
+                            json.dump(dados, f, indent=4)
+
+                        print(f"\nUsuário '{usuario_removido}' foi removido com sucesso!")
+                        input("\nPressione qualquer tecla para voltar.")
+                    else:
+                        print("\nExclusão cancelada.")
+                        input("\nPressione qualquer tecla para voltar.")
+                else:
+                    print("Escolha inválida.")
+                    input("\nPressione qualquer tecla para voltar.")
+            except ValueError:
+                voltando()
+        elif menu_usuarios == '2':
+            os.system('cls')
+            print("\nUsuários cadastrados:")
+            for i, usuario in enumerate(usuarios_sem_admin, 1):
+                print(f"{i} - {usuario}")
+
+            try:
+                escolha = int(input("\nEscolha o número do usuário para visualizar a biblioteca. \nOu aperte qualquer tecla para voltar.\n"))
+                if 1 <= escolha <= len(usuarios_sem_admin):
+                    usuario_escolhido = usuarios_sem_admin[escolha - 1]
+                    livros_user = bibliotecas.get(usuario_escolhido, [])
+                    print(f"\nBiblioteca de {usuario_escolhido}:")
+                    if livros_user:
+                        for idx, livro in enumerate(livros_user, 1):
+                            print(f"{idx} - {livro['titulo']} ({livro['genero']})")
+                    else:
+                        print("Este usuário não possui livros cadastrados.")
+                    input("\nPressione qualquer tecla para voltar.")
+                else:
+                    print("Escolha inválida.")
+                    input("\nPressione qualquer tecla para voltar.")
+            except ValueError:
+                voltando()
+        elif menu_usuarios == '3':
             voltando()
             break
         else:
-            mostrar_usuarios()
-            menu_usuarios = input("\n1) Excluir um usuário \n2) Visualizar biblioteca de usuário \n3) Voltar\n")
-            if menu_usuarios == '1':
-                while True:
-                    os.system('cls')
-                    mostrar_usuarios()
-                    try:
-                        usuario_escolha = int(input("\nEscolha o número do usuário para excluir. \nOu aperte qualquer tecla para voltar.\n"))
-                        if 1 <= usuario_escolha < len(usuarios):
-                            usuario_removido = usuarios.pop(usuario_escolha)
-                            bibliotecas.pop(usuario_removido, None)
-                            print(f"Foi removido o cadastro de '{usuario_removido}' da Livraria.\n")
-                            break
-                        else:
-                            print("Escolha de usuário inválida, tente novamente")
-                    except:
-                        voltando()
-                        break
-            elif menu_usuarios == '2':
-                os.system('cls')
-                while True:
-                    try:
-                        mostrar_usuarios()
-                        print(20 * "-=")
-                        posicao = int(input("\nEscolha a posição do usuário que deseja verificar sua biblioteca. \nOu aperte qualquer tecla para voltar.\n")) - 1
-                        os.system('cls')
-                        if 0 <= posicao < (len(usuarios) - 1):
-                            usuario_selecionado = usuarios[posicao + 1]
-                            livros_user = bibliotecas.get(usuario_selecionado, [])
-                            print(20 * "-=")
-                            print("\nUsuário:", usuario_selecionado)
-                            if not livros_user:
-                                print("Este usuário não tem nenhum livro na sua biblioteca.")
-                            else:
-                                for i, livro in enumerate(livros_user, 1):
-                                    print(f"{i} - {livro}")
-                            input("\nPressione qualquer tecla para voltar.")
-                            voltando()
-                        else:
-                            print("Não existe usuário nesta posição, tente novamente!")
-                    except ValueError:
-                        voltando()
-                        break
-                os.system('cls')
-            elif menu_usuarios == '3':
-                voltando()
-                break
-            else:
-                print("Você deve escolher uma das opções abaixo, (1-3).")
-    os.system('cls')
+            print("Você deve escolher uma das opções abaixo, (1-3).")
 
 def buscar_novos_livros(lista_livros, livros_lidos):
     # Retorna a lista de livros que o usuário ainda não leu
@@ -417,18 +450,18 @@ def salvar_dados(dados, arquivo='dados.json'):
 
 
 def carregar_livros():
-    if not os.path.exists(caminho_livros):
-        with open(caminho_livros, "w", encoding="utf-8") as f:
+    if not os.path.exists(CAMINHO_LIVROS):
+        with open(CAMINHO_LIVROS, "w", encoding="utf-8") as f:
             json.dump([], f, ensure_ascii=False, indent=4)
         return []
-    with open(caminho_livros, "r", encoding="utf-8") as f:
+    with open(CAMINHO_LIVROS, "r", encoding="utf-8") as f:
         try:
             return json.load(f)
         except json.JSONDecodeError:
             return []
 
 def salvar_livros(lista_livros):
-    with open(caminho_livros, "w", encoding="utf-8") as f:
+    with open(CAMINHO_LIVROS, "w", encoding="utf-8") as f:
         json.dump(lista_livros, f, ensure_ascii=False, indent=4)
 
 # Inicialmente carrega os livros em memória

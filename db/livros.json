@@ -1,46 +1,42 @@
 [
-    {
-        "titulo": "1984",
-        "genero": "Distopia"
-    },
-    {
-        "titulo": "Dom Quixote",
-        "genero": "Romance"
-    },
-    {
-        "titulo": "O Hobbit",
-        "genero": "Fantasia"
-    },
-    {
-        "titulo": "O Pequeno Príncipe",
-        "genero": "Fábula"
-    },
-    {
-        "titulo": "fe",
-        "genero": "fe"
-    },
-    {
-        "titulo": "Orgulho e Preconceito",
-        "genero": "Romance"
-    },
-    {
-        "titulo": "Crime e Castigo",
-        "genero": "Drama"
-    },
-    {
-        "titulo": "A Guerra dos Mundos",
-        "genero": "Ficção Científica"
-    },
-    {
-        "titulo": "Moby Dick",
-        "genero": "Aventura"
-    },
-    {
-        "titulo": "O Senhor dos Anéis",
-        "genero": "Fantasia"
-    },
-    {
-        "titulo": "asd",
-        "genero": "asd"
-    }
+  {
+    "titulo": "Dom Casmurro",
+    "genero": "Romance"
+  },
+  {
+    "titulo": "1984",
+    "genero": "Distopia"
+  },
+  {
+    "titulo": "O Pequeno Príncipe",
+    "genero": "Fábula"
+  },
+  {
+    "titulo": "Cem Anos de Solidão",
+    "genero": "Realismo Mágico"
+  },
+  {
+    "titulo": "A Revolução dos Bichos",
+    "genero": "Política"
+  },
+  {
+    "titulo": "O Senhor dos Anéis",
+    "genero": "Fantasia"
+  },
+  {
+    "titulo": "Harry Potter e a Pedra Filosofal",
+    "genero": "Fantasia"
+  },
+  {
+    "titulo": "Orgulho e Preconceito",
+    "genero": "Romance"
+  },
+  {
+    "titulo": "O Hobbit",
+    "genero": "Fantasia"
+  },
+  {
+    "titulo": "O Código Da Vinci",
+    "genero": "Suspense"
+  }
 ]

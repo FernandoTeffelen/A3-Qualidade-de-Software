@@ -10,5 +10,41 @@
     {
         "titulo": "O Hobbit",
         "genero": "Fantasia"
+    },
+    {
+        "titulo": "O Pequeno Príncipe",
+        "genero": "Fábula"
+    },
+    {
+        "titulo": "A Revolução dos Bichos",
+        "genero": "Satira"
+    },
+    {
+        "titulo": "Orgulho e Preconceito",
+        "genero": "Romance"
+    },
+    {
+        "titulo": "Crime e Castigo",
+        "genero": "Drama"
+    },
+    {
+        "titulo": "A Guerra dos Mundos",
+        "genero": "Ficção Científica"
+    },
+    {
+        "titulo": "Moby Dick",
+        "genero": "Aventura"
+    },
+    {
+        "titulo": "O Senhor dos Anéis",
+        "genero": "Fantasia"
+    },
+    {
+        "titulo": "fe",
+        "genero": "fe"
+    },
+    {
+        "titulo": "as",
+        "genero": "as"
     }
 ]

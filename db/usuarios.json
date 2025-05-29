@@ -1,6 +1,17 @@
 {
-    "admin": {
-        "senha": "admin",
-        "biblioteca": []
+    "usuarios": [
+        "admin",
+        "fernando",
+        "bernardo"
+    ],
+    "senhas": {
+        "admin": "admin",
+        "fernando": "fernando",
+        "bernardo": "bernardo"
+    },
+    "bibliotecas": {
+        "admin": [],
+        "fernando": [],
+        "bernardo": []
     }
 }

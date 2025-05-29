@@ -1,6 +1,6 @@
 import os
 import json
-from core.defs import voltando, saindo, carregar_usuarios
+from core.defs import voltando, saindo, carregar_usuarios, salvar_usuarios
 from getpass import getpass
 
 CAMINHO_DB = "db/usuarios.json"
@@ -12,10 +12,6 @@ if not os.path.exists("db"):
 if not os.path.exists(CAMINHO_DB):
     with open(CAMINHO_DB, "w", encoding="utf-8") as f:
         json.dump({"admin": {"senha": "admin", "biblioteca": []}}, f, indent=4)
-
-def salvar_usuarios(dados, arquivo='usuarios.json'):
-    with open(arquivo, 'w') as f:
-        json.dump(dados, f)
 
 def login_ou_cadastro():
     while True:

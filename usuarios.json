@@ -5,7 +5,8 @@
         "pedro",
         "bernardo",
         "nikolas",
-        "as"
+        "as",
+        "fe"
     ],
     "senhas": {
         "admin": "admin",
@@ -13,7 +14,8 @@
         "pedro": "pedro",
         "bernardo": "bernardo",
         "nikolas": "nikolas",
-        "as": "as"
+        "as": "as",
+        "fe": "fe"
     },
     "bibliotecas": {
         "fernando": [
@@ -28,6 +30,9 @@
         "as": [
             "Dom Casmurro",
             "1984"
+        ],
+        "fe": [
+            "fe"
         ]
     }
 }

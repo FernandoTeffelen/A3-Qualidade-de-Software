@@ -4,6 +4,9 @@ import json
 
 from core.db import livros, generos, usuarios, senhas, bibliotecas
 
+CAMINHO_USUARIOS = "db/usuarios.json"
+caminho_livros = "db/livros.json"
+
 def voltando():
     time.sleep(1)
     os.system('cls')
@@ -12,9 +15,9 @@ def saindo():
     print("Saindo da conta...")
 
 def mostrar_livros():
-    print("Livros cadastrados:")
-    for i, (livro, genero) in enumerate(zip(livros, generos), 1):
-        print(f"{i} - {livro} ({genero})")
+    print("\nLivros cadastrados:")
+    for i, livro in enumerate(livros, start=1):
+        print(f"{i}. {livro['titulo']} - {livro['genero']}")
 
 def mostrar_usuarios():
     print("Usuários cadastrados:")
@@ -34,16 +37,21 @@ def cadastro_novo_livro():
     os.system('cls')
     print("Cadastro de um novo livro.\nOu digite \"voltar\", para voltar ao menu.\n")
     print(20*"-=")
+    global livros  # para usar a lista global carregada do JSON
     while True:
-        livro = input("Nome do livro: ")
-        if livro == 'voltar':
+        titulo = input("Nome do livro: ")
+        if titulo.lower() == 'voltar':
             voltando()
             break
         genero = input("Gênero do livro: ")
-        livros.append(livro)
-        generos.append(genero)
-        os.system('cls')
+        
+        # Adiciona novo livro na lista em memória
+        livros.append({"titulo": titulo, "genero": genero})
+        
+        # Salva a lista atualizada no arquivo JSON
+        salvar_livros(livros)
 
+        os.system('cls')
         while True:
             continuar = input("Deseja cadastrar outro livro? \n1) sim \n2) não\n")
             print(20*"-=")
@@ -58,6 +66,7 @@ def cadastro_novo_livro():
 
 def alterar_livro():
     mostrar_livros()
+    global livros
     try:
         print(20*"-=")
         posicao = int(input("\nDigite a posição do livro que deseja alterar, ou aperte qualquer tecla para voltar.\n")) - 1
@@ -65,8 +74,11 @@ def alterar_livro():
             print(20*"-=")
             novo_titulo = input("\nDigite o novo nome do livro: ")
             novo_genero = input("Digite o novo gênero do livro: ")
-            livros[posicao] = novo_titulo
-            generos[posicao] = novo_genero
+            livros[posicao]["titulo"] = novo_titulo
+            livros[posicao]["genero"] = novo_genero
+
+            salvar_livros(livros)
+
             print(20*"-=")
             input(f"\nLivro na posição {posicao + 1} atualizado com sucesso! Aperte qualquer tecla para voltar.\n")
             voltando()
@@ -75,6 +87,7 @@ def alterar_livro():
     except ValueError:
         voltando()
         os.system('cls')
+
 
 def livros_cadastrados_menu():
     while True:
@@ -88,9 +101,9 @@ def livros_cadastrados_menu():
                 livro_escolha = int(input("\nEscolha o número do livro para excluir: "))
                 if 1 <= livro_escolha <= len(livros):
                     livro_removido = livros.pop(livro_escolha - 1)
-                    generos.pop(livro_escolha - 1)
+                    salvar_livros(livros)  # salva a lista atualizada no JSON
                     os.system('cls')
-                    print(f"O livro '{livro_removido}' foi removido da Livraria.")
+                    print(f"O livro '{livro_removido['titulo']}' foi removido da Livraria.")
                 else:
                     print("Escolha de livro inválida.")
             except ValueError:
@@ -186,54 +199,58 @@ def buscar_novos_livros(lista_livros, livros_lidos):
     novos = [livro for livro in lista_livros if livro not in livros_lidos]
     return novos
 
-
 def biblioteca_usuario_menu(biblioteca_pessoal, lista_livros):
     while True:
+        dados = carregar_usuarios()
         print("\n=== Biblioteca do Usuário ===")
-        print("1 - Ver livros salvos")
-        print("2 - Adicionar livro")
-        print("3 - Remover livro")
+        print("1 - Ler livros salvos")
+        print("2 - Remover livros")
         print("0 - Voltar")
         escolha = input("Escolha: ")
 
         if escolha == "1":
             if biblioteca_pessoal:
-                print("Livros salvos:")
-                for livro in biblioteca_pessoal:
-                    print(f"- {livro}")
+                print("\nLivros salvos:")
+                for i, livro in enumerate(biblioteca_pessoal, start=1):
+                    print(f"{i}. {livro['titulo']} - {livro['genero']}")
+
+                while True:
+                    escolha_livro = input("\nDigite o número do livro que deseja ler ou 0 para voltar: ")
+
+                    if escolha_livro.isdigit():
+                        escolha_livro = int(escolha_livro)
+                        if escolha_livro == 0:
+                            break
+                        elif 1 <= escolha_livro <= len(biblioteca_pessoal):
+                            os.system('cls' if os.name == 'nt' else 'clear')
+                            print("\nQuando quiser sair deste livro, apenas pressione qualquer tecla.")
+                            print(35 * "-=")
+                            print(f"\n\n\n                                         {biblioteca_pessoal[escolha_livro - 1]['titulo']}.\n")
+                            texto()  # Exibe o conteúdo do livro
+                            input('')
+                            voltando()
+                            break
+                        else:
+                            print("Número inválido. Tente novamente.")
+                    else:
+                        print("Digite apenas números.")
             else:
                 print("Nenhum livro salvo na biblioteca.")
+
+
         elif escolha == "2":
-            novos_livros = buscar_novos_livros(lista_livros, biblioteca_pessoal)
-            if not novos_livros:
-                print("Nenhum livro novo para adicionar.")
-            else:
-                print("Livros disponíveis para adicionar:")
-                for idx, livro in enumerate(novos_livros, 1):
-                    print(f"{idx} - {livro}")
-                escolha_livro = input("Digite o número do livro para adicionar: ")
-                if escolha_livro.isdigit():
-                    escolha_livro = int(escolha_livro)
-                    if 1 <= escolha_livro <= len(novos_livros):
-                        biblioteca_pessoal.append(novos_livros[escolha_livro - 1])
-                        print("Livro adicionado com sucesso.")
-                    else:
-                        print("Opção inválida.")
-                else:
-                    print("Entrada inválida.")
-        elif escolha == "3":
             if not biblioteca_pessoal:
                 print("Nenhum livro para remover.")
             else:
                 print("Livros salvos:")
                 for idx, livro in enumerate(biblioteca_pessoal, 1):
-                    print(f"{idx} - {livro}")
+                    print(f"{idx} - {livro['titulo']} - {livro['genero']}")
                 escolha_livro = input("Digite o número do livro para remover: ")
                 if escolha_livro.isdigit():
                     escolha_livro = int(escolha_livro)
                     if 1 <= escolha_livro <= len(biblioteca_pessoal):
                         removido = biblioteca_pessoal.pop(escolha_livro - 1)
-                        print(f"Livro '{removido}' removido com sucesso.")
+                        print(f"Livro '{removido['titulo']}' removido com sucesso.")
                     else:
                         print("Opção inválida.")
                 else:
@@ -244,10 +261,32 @@ def biblioteca_usuario_menu(biblioteca_pessoal, lista_livros):
             print("Opção inválida, tente novamente.")
 
 
-def alterar_conta(usuarios, senhas, usuario_atual):
+def atualizar_dados_usuario(dados, usuario_antigo, novo_usuario=None, nova_senha=None):
+    if novo_usuario and novo_usuario != usuario_antigo:
+        if usuario_antigo in dados['usuarios']:
+            dados['usuarios'].remove(usuario_antigo)
+            dados['usuarios'].append(novo_usuario)
+
+        if usuario_antigo in dados['senhas']:
+            dados['senhas'][novo_usuario] = dados['senhas'].pop(usuario_antigo)
+
+        if usuario_antigo in dados['bibliotecas']:
+            dados['bibliotecas'][novo_usuario] = dados['bibliotecas'].pop(usuario_antigo)
+
+    if nova_senha:
+        if novo_usuario:
+            dados['senhas'][novo_usuario] = nova_senha
+        else:
+            dados['senhas'][usuario_antigo] = nova_senha
+
+    return dados
+
+
+def alterar_conta(usuarios, senhas, bibliotecas, usuario_atual):
     print("\n=== Alterar Conta ===")
     print("1 - Alterar usuário")
     print("2 - Alterar senha")
+    print("3 - Excluir conta")
     print("0 - Voltar")
     escolha = input("Escolha: ")
 
@@ -255,34 +294,119 @@ def alterar_conta(usuarios, senhas, usuario_atual):
         novo_usuario = input("Digite o novo nome de usuário: ")
         if novo_usuario in usuarios:
             print("Nome de usuário já existe.")
+            return usuario_atual
         else:
             idx = usuarios.index(usuario_atual)
             usuarios[idx] = novo_usuario
+            senhas[novo_usuario] = senhas.pop(usuario_atual)
+            bibliotecas[novo_usuario] = bibliotecas.pop(usuario_atual)
             print("Usuário alterado com sucesso.")
-            return novo_usuario  # Atualiza o usuário atual
+            return novo_usuario
+
     elif escolha == "2":
         nova_senha = input("Digite a nova senha: ")
-        idx = usuarios.index(usuario_atual)
-        senhas[idx] = nova_senha
+        senhas[usuario_atual] = nova_senha
         print("Senha alterada com sucesso.")
+        return usuario_atual
+
+    elif escolha == "3":
+        usuario_confirm = input("Digite seu nome de usuário para confirmar: ")
+        senha_confirm = input("Digite sua senha para confirmar: ")
+
+        if usuario_confirm == usuario_atual and senhas.get(usuario_confirm) == senha_confirm:
+            print("Você irá perder toda sua biblioteca, confirma exclusão de conta?")
+            print("1 - Sim")
+            print("2 - Não")
+            confirma = input("Escolha: ")
+            if confirma == "1":
+                usuarios.remove(usuario_atual)
+                senhas.pop(usuario_atual, None)
+                bibliotecas.pop(usuario_atual, None)
+                print("Conta excluída com sucesso.")
+                return None  # Sinaliza que a conta foi excluída
+            else:
+                print("Exclusão cancelada.")
+                return usuario_atual
+        else:
+            print("Usuário ou senha incorretos. Exclusão cancelada.")
+            return usuario_atual
+
     elif escolha == "0":
         return usuario_atual
+
     else:
         print("Opção inválida.")
-    return usuario_atual
+        return usuario_atual
 
-def carregar_usuarios(arquivo='usuarios.json'):
+
+def carregar_usuarios(arquivo='db/usuarios.json'):
+    if not os.path.exists(arquivo):
+        dados = {
+            "usuarios": ["admin"],
+            "senhas": {"admin": "admin"},
+            "bibliotecas": {"admin": []}
+        }
+        salvar_usuarios(dados, arquivo)
+        return dados
+
     try:
         with open(arquivo, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {
-            'usuarios': [],
-            'senhas': {},
-            'bibliotecas': {}
-        }
+            conteudo = f.read().strip()
+            if not conteudo:
+                dados = {
+                    "usuarios": ["admin"],
+                    "senhas": {"admin": "admin"},
+                    "bibliotecas": {"admin": []}
+                }
+                salvar_usuarios(dados, arquivo)
+                return dados
 
-def salvar_usuarios(dados, arquivo='usuarios.json'):
+            dados = json.loads(conteudo)
+
+            # Corrigir formato antigo (se existir)
+            if "usuarios" not in dados or "senhas" not in dados or "bibliotecas" not in dados:
+                # Formato antigo -> cria novo
+                dados = {
+                    "usuarios": ["admin"],
+                    "senhas": {"admin": "admin"},
+                    "bibliotecas": {"admin": []}
+                }
+                salvar_usuarios(dados, arquivo)
+                return dados
+
+            # Adiciona admin se não tiver
+            if "admin" not in dados["usuarios"]:
+                dados["usuarios"].append("admin")
+                dados["senhas"]["admin"] = "admin"
+                dados["bibliotecas"]["admin"] = []
+
+            # Corrigir livros salvos como strings
+            for user, livros_user in dados["bibliotecas"].items():
+                novos_livros = []
+                for livro in livros_user:
+                    if isinstance(livro, str):
+                        livro_catalogo = next((l for l in livros if l["titulo"] == livro), None)
+                        if livro_catalogo:
+                            novos_livros.append(livro_catalogo)
+                        else:
+                            pass  # Ignora livros que não existem mais no catálogo
+                    else:
+                        novos_livros.append(livro)
+                dados["bibliotecas"][user] = novos_livros
+
+            salvar_usuarios(dados, arquivo)
+            return dados
+
+    except (FileNotFoundError, json.JSONDecodeError):
+        dados = {
+            "usuarios": ["admin"],
+            "senhas": {"admin": "admin"},
+            "bibliotecas": {"admin": []}
+        }
+        salvar_usuarios(dados, arquivo)
+        return dados
+
+def salvar_usuarios(dados, arquivo='db/usuarios.json'):
     with open(arquivo, 'w') as f:
         json.dump(dados, f, indent=4)
 
@@ -292,6 +416,23 @@ def salvar_dados(dados, arquivo='dados.json'):
         json.dump(dados, f, indent=4)
 
 
+def carregar_livros():
+    if not os.path.exists(caminho_livros):
+        with open(caminho_livros, "w", encoding="utf-8") as f:
+            json.dump([], f, ensure_ascii=False, indent=4)
+        return []
+    with open(caminho_livros, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return []
+
+def salvar_livros(lista_livros):
+    with open(caminho_livros, "w", encoding="utf-8") as f:
+        json.dump(lista_livros, f, ensure_ascii=False, indent=4)
+
+# Inicialmente carrega os livros em memória
+livros = carregar_livros()
 
 
 # MENU ADMIN
@@ -319,45 +460,51 @@ def menu_admin():
 def menu_usuario(usuario):
     while True:
         print("Olá", usuario, "Seja bem vindo.\n")
-        menu = input("Escolha o que quer: \n1) Adicionar livros à sua biblioteca \n2) Sua biblioteca (ver, ler, excluir livros) \n3) Alterar sua conta \n4) Sair do conta\n")
+        menu = input("Escolha o que quer: \n1) Adicionar livros à sua biblioteca \n2) Sua biblioteca (ver, ler e excluir livros) \n3) Alterar sua conta \n4) Sair da conta\n")
         print(35*"-=")
         os.system('cls')
 
-        # Carrega dados atuais do arquivo JSON
         dados = carregar_usuarios()
 
-        # Garante que o usuário exista no dicionário de bibliotecas
         if usuario not in dados['bibliotecas']:
             dados['bibliotecas'][usuario] = []
 
         biblioteca_pessoal = dados['bibliotecas'][usuario]
 
         if menu == "1":
-            # Adicionar livros na biblioteca
             adicionar_livro_menu(biblioteca_pessoal, dados)
             salvar_usuarios(dados)
+
         elif menu == "2":
-            # Ver, ler e excluir livros da biblioteca
             biblioteca_usuario_menu(biblioteca_pessoal, livros)
             salvar_usuarios(dados)
+
         elif menu == "3":
-            novo_usuario = alterar_conta(dados['usuarios'], dados['senhas'], usuario)
-            if novo_usuario != usuario:
-                # Atualiza o nome de usuário no dicionário de bibliotecas
-                dados['bibliotecas'][novo_usuario] = dados['bibliotecas'].pop(usuario)
+            novo_usuario = alterar_conta(dados['usuarios'], dados['senhas'], dados['bibliotecas'], usuario)
+            if novo_usuario is None:
+                # Conta excluída, sai do menu
+                salvar_usuarios(dados)
+                print("Saindo... Sua conta foi excluída.")
+                time.sleep(2)
+                break
+            elif novo_usuario != usuario:
                 usuario = novo_usuario
             salvar_usuarios(dados)
+
         elif menu == "4":
             saindo()
             break
+
         else:
             print("Escolha uma das opções válidas (1-4)")
             time.sleep(2)
+
         os.system('cls')
 
 def adicionar_livro_menu(biblioteca_pessoal, dados):
-    # Livros disponíveis para adicionar = todos os livros cadastrados menos os que já estão na biblioteca pessoal
-    livros_disponiveis = [livro for livro in livros if livro not in biblioteca_pessoal]
+    titulos_biblioteca = {livro['titulo'] for livro in biblioteca_pessoal}
+    livros_disponiveis = [livro for livro in livros if livro['titulo'] not in titulos_biblioteca]
+
     if not livros_disponiveis:
         print("Nenhum livro novo para adicionar.")
         time.sleep(2)
@@ -365,7 +512,7 @@ def adicionar_livro_menu(biblioteca_pessoal, dados):
 
     print("Livros disponíveis para adicionar:")
     for idx, livro in enumerate(livros_disponiveis, 1):
-        print(f"{idx} - {livro}")
+        print(f"{idx} - {livro['titulo']} - {livro['genero']}")
 
     escolha_livro = input("Digite o número do livro para adicionar (ou 0 para voltar): ")
     if escolha_livro.isdigit():
@@ -375,7 +522,7 @@ def adicionar_livro_menu(biblioteca_pessoal, dados):
         if 1 <= escolha_livro <= len(livros_disponiveis):
             livro_escolhido = livros_disponiveis[escolha_livro - 1]
             biblioteca_pessoal.append(livro_escolhido)
-            print(f"Livro '{livro_escolhido}' adicionado com sucesso.")
+            print(f"Livro '{livro_escolhido['titulo']}' adicionado com sucesso.")
             time.sleep(2)
         else:
             print("Opção inválida.")
@@ -383,3 +530,4 @@ def adicionar_livro_menu(biblioteca_pessoal, dados):
     else:
         print("Entrada inválida.")
         time.sleep(2)
+

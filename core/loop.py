@@ -35,9 +35,6 @@ def iniciar_programa():
                 print("Opção inválida.")
 
 
-
-
-
 def carregar_dados():
     import json
     global usuarios, senhas, bibliotecas, livros, generos

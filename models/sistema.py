@@ -1,100 +1,81 @@
+# models/sistema.py
+from typing import Optional
+
+from repositories.repositorio_livros import RepositorioLivros
+from repositories.repositorio_usuarios import RepositorioUsuarios
+from services.autenticacao import ServicoAutenticacao
 from models.usuario import Usuario
-from models.biblioteca import Biblioteca
-from core.defs import carregar_usuarios, salvar_usuarios
+from models.admin import Admin
+from utils.helpers import limpar_tela, aguardar_e_limpar, exibir_mensagem_e_aguardar
 
 class Sistema:
     def __init__(self):
-        self.biblioteca = Biblioteca()  # Objeto para gerenciar livros disponíveis
-        self._carregar_usuarios()
-        print(f"[DEBUG] Usando objeto da classe: {self.__class__}")
+        self.repo_livros = RepositorioLivros()
+        self.repo_usuarios = RepositorioUsuarios()
+        self.servico_auth = ServicoAutenticacao(self.repo_usuarios)
+        self.usuario_logado: Optional[Usuario | Admin] = None # Python 3.10+ para |
 
-    def _carregar_usuarios(self):
-        dados = carregar_usuarios()
-        self.usuarios = dados.get('usuarios', [])
-        self.senhas = dados.get('senhas', {})
-        self.bibliotecas = dados.get('bibliotecas', {})
+    def iniciar_sessao(self):
+        """ Tenta logar ou cadastrar um usuário e direciona para o menu apropriado. """
+        limpar_tela()
+        while True: # Loop para login/cadastro
+            if self.usuario_logado: # Se já estiver logado (raro cair aqui, mas por segurança)
+                self._direcionar_para_menu()
+                if not self.usuario_logado: # Se fez logout
+                    continue # Volta para o menu de login/cadastro
 
-    def _salvar_usuarios(self):
-        salvar_usuarios({
-            'usuarios': self.usuarios,
-            'senhas': self.senhas,
-            'bibliotecas': self.bibliotecas
-        })
+            print("Bem-vindo à Biblioteca Virtual!")
+            print("1. Login")
+            print("2. Cadastro")
+            print("0. Sair do Programa")
+            acao = input("Escolha uma opção: ").strip().lower()
+            limpar_tela()
 
-    def atualizar_dados(self):
-        """Carrega os dados mais recentes do JSON"""
-        self._carregar_usuarios()
+            nome_usuario_sessao = None
+            if acao == '1': # Login
+                nome_usuario_sessao = self.servico_auth.login()
+                if nome_usuario_sessao:
+                    if nome_usuario_sessao == "admin":
+                        self.usuario_logado = Admin(nome_usuario_sessao, self.repo_usuarios, self.repo_livros)
+                    else:
+                        self.usuario_logado = Usuario(nome_usuario_sessao, self.repo_usuarios, self.repo_livros)
+                    exibir_mensagem_e_aguardar(f"Login bem-sucedido! Bem-vindo(a), {nome_usuario_sessao}!", segundos_espera=1.5)
+                else:
+                    exibir_mensagem_e_aguardar("Falha no login. Tente novamente.", segundos_espera=1.5)
+            
+            elif acao == '2': # Cadastro
+                nome_usuario_sessao = self.servico_auth.cadastro()
+                if nome_usuario_sessao: # Cadastro bem-sucedido, loga automaticamente
+                     self.usuario_logado = Usuario(nome_usuario_sessao, self.repo_usuarios, self.repo_livros)
+                     exibir_mensagem_e_aguardar(f"Cadastro realizado! Bem-vindo(a), {nome_usuario_sessao}!", segundos_espera=1.5)
+                else:
+                    exibir_mensagem_e_aguardar("Falha no cadastro. Verifique os dados e tente novamente.", segundos_espera=1.5)
 
-    def login(self, usuario, senha):
-        self.atualizar_dados()  # Garante os dados mais recentes
-        if usuario in self.usuarios and self.senhas.get(usuario) == senha:
-            return Usuario(usuario, senha)
-        return None
+            elif acao == '0': # Sair do programa
+                print("Saindo do programa...")
+                aguardar_e_limpar(1)
+                break # Encerra o loop de login/cadastro e o programa
+            
+            else:
+                exibir_mensagem_e_aguardar("Opção inválida.", segundos_espera=1.5)
 
-    def cadastro(self, usuario, senha):
-        self.atualizar_dados()  # Atualiza antes de cadastrar
-        if usuario in self.usuarios:
-            return False, "Usuário já existe"
-        self.usuarios.append(usuario)
-        self.senhas[usuario] = senha
-        self.bibliotecas[usuario] = []
-        self._salvar_usuarios()
-        return True, "Cadastro realizado"
+            if self.usuario_logado:
+                self._direcionar_para_menu()
 
-    def mostrar_livros(self):
-        for i, livro in enumerate(self.biblioteca.livros, 1):
-            print(f"{i} - {livro}")
 
-    def livros_por_genero(self, genero):
-        indices = [i for i, livro in enumerate(self.biblioteca.livros) if self.biblioteca.generos[i] == genero]
-        for i in indices:
-            print(f"{i+1} - {self.biblioteca.livros[i]}")
-        return indices
+    def _direcionar_para_menu(self):
+        """ Direciona para o menu do admin ou do usuário comum. """
+        if not self.usuario_logado:
+            return
 
-    def adicionar_livro(self, usuario, posicao):
-        self.atualizar_dados()  # Sempre atualiza antes de modificar
-        livro = self.biblioteca.livros[posicao]
-        if usuario in self.bibliotecas:
-            if livro not in self.bibliotecas[usuario]:
-                self.bibliotecas[usuario].append(livro)
-                self._salvar_usuarios()
-
-    def mostrar_biblioteca(self, usuario):
-        self.atualizar_dados()
-        livros_usuario = self.bibliotecas.get(usuario, [])
-        if not livros_usuario:
-            print("Sua biblioteca está vazia.")
-        else:
-            print(f"Biblioteca de {usuario}:")
-            for i, livro in enumerate(livros_usuario, 1):
-                print(f"{i} - {livro}")
-
-    def remover_livro(self, usuario, posicao):
-        self.atualizar_dados()
-        livros_usuario = self.bibliotecas.get(usuario, [])
-        if 0 <= posicao < len(livros_usuario):
-            livro = livros_usuario.pop(posicao)
-            self._salvar_usuarios()
-            return livro
-        return None
-
-    def alterar_usuario(self, usuario_antigo, novo_usuario, nova_senha):
-        self.atualizar_dados()
-        if novo_usuario in self.usuarios:
-            return False, "Usuário já em uso"
-        if usuario_antigo not in self.usuarios:
-            return False, "Usuário antigo não encontrado"
-
-        self.usuarios.remove(usuario_antigo)
-        self.usuarios.append(novo_usuario)
-
-        senha_antiga = self.senhas.pop(usuario_antigo)
-        self.senhas[novo_usuario] = nova_senha
-
-        if usuario_antigo in self.bibliotecas:
-            self.bibliotecas[novo_usuario] = self.bibliotecas.pop(usuario_antigo)
-        else:
-            self.bibliotecas[novo_usuario] = []
-
-        self._salvar_usuarios()
-        return True, "Usuário alterado com sucesso"
+        deslogar = False
+        if isinstance(self.usuario_logado, Admin):
+            deslogar = self.usuario_logado.menu_principal_admin()
+        elif isinstance(self.usuario_logado, Usuario):
+            deslogar = self.usuario_logado.menu_principal_usuario()
+        
+        if deslogar:
+            self.usuario_logado = None # Efetua o logout
+            limpar_tela()
+            print("Você foi desconectado.")
+            aguardar_e_limpar(1.5)

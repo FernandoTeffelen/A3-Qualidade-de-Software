@@ -1,5 +1,5 @@
 # models/admin.py
-from typing import TYPE_CHECKING, List, Optional # Adicionado List e Optional para type hints se necessário em futuras expansões
+from typing import TYPE_CHECKING, List, Optional
 from models.livro import Livro
 from utils.helpers import limpar_tela, aguardar_e_limpar, exibir_mensagem_e_aguardar, sair_da_conta_mensagem, texto_placeholder_livro
 
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class Admin:
     def __init__(self, nome: str, repo_usuarios: 'RepositorioUsuarios', repo_livros: 'RepositorioLivros'):
-        self.nome = nome # Geralmente "admin"
+        self.nome = nome
         self.repo_usuarios = repo_usuarios
         self.repo_livros = repo_livros
 
@@ -37,7 +37,7 @@ class Admin:
             continuar = input("Deseja cadastrar outro livro? (s/n): ").strip().lower()
             if continuar != 's':
                 break
-            limpar_tela() # Limpa para o próximo cadastro
+            limpar_tela()
         aguardar_e_limpar()
 
     def _menu_alterar_livro_catalogo(self):
@@ -72,14 +72,14 @@ class Admin:
                     exibir_mensagem_e_aguardar(f"Livro '{novo_titulo}' atualizado com sucesso!")
                 else:
                     # Mensagem de erro específica já é mostrada pelo repositório se o título novo já existe
-                    exibir_mensagem_e_aguardar(f"Não foi possível atualizar o livro.") # Esta msg pode ser redundante
+                    exibir_mensagem_e_aguardar(f"Não foi possível atualizar o livro.")
             else:
                 exibir_mensagem_e_aguardar("Posição inválida.")
         except ValueError:
             exibir_mensagem_e_aguardar("Entrada inválida.")
         aguardar_e_limpar(segundos=0.1) # Pequeno delay para a msg do input ser vista se for o caso
 
-    def _menu_gerenciar_livros_cadastrados(self): # MÉTODO ALTERADO
+    def _menu_gerenciar_livros_cadastrados(self):
         while True:
             limpar_tela()
             print("=== Livros Cadastrados no Catálogo ===")
@@ -92,7 +92,7 @@ class Admin:
             
             print("\nOpções:")
             print("1. Excluir livro selecionado")
-            print("2. Visualizar conteúdo do livro selecionado (simulação)") # <--- ALTERAÇÃO AQUI
+            print("2. Visualizar conteúdo do livro selecionado (simulação)")
             print("0. Voltar")
             
             escolha_acao = input("\nEscolha uma opção: ").strip()
@@ -101,11 +101,11 @@ class Admin:
                 aguardar_e_limpar()
                 break
             
-            if not livros_catalogo and escolha_acao in ["1", "2"]: # <--- ALTERAÇÃO AQUI (inclui "2")
+            if not livros_catalogo and escolha_acao in ["1", "2"]:
                 exibir_mensagem_e_aguardar("Nenhum livro para selecionar.")
                 continue
 
-            if escolha_acao in ["1", "2"]: # <--- ALTERAÇÃO AQUI (inclui "2")
+            if escolha_acao in ["1", "2"]:
                 num_livro_str = input("Digite o número do livro: ").strip()
                 if not num_livro_str.isdigit():
                     exibir_mensagem_e_aguardar("Entrada inválida. Deve ser um número.")
@@ -116,22 +116,21 @@ class Admin:
                 if 0 <= idx_livro < len(livros_catalogo):
                     livro_selecionado = livros_catalogo[idx_livro]
                     
-                    if escolha_acao == "1": # Excluir livro
+                    if escolha_acao == "1":
                         confirmacao = input(f"Tem certeza que deseja excluir '{livro_selecionado.titulo}' do catálogo? (s/n): ").strip().lower()
                         if confirmacao == 's':
                             removido = self.repo_livros.remover_livro_por_titulo(livro_selecionado.titulo)
                             if removido:
                                 exibir_mensagem_e_aguardar(f"Livro '{removido.titulo}' excluído do catálogo.")
                             else:
-                                 exibir_mensagem_e_aguardar("Não foi possível excluir o livro.")
+                                exibir_mensagem_e_aguardar("Não foi possível excluir o livro.")
                         else:
                             exibir_mensagem_e_aguardar("Exclusão cancelada.")
                     
-                    elif escolha_acao == "2": # Visualizar conteúdo do livro  # <--- ALTERAÇÃO AQUI (lógica adicionada)
+                    elif escolha_acao == "2":
                         limpar_tela()
                         print(f"Visualizando '{livro_selecionado.titulo}'...\n")
                         texto_placeholder_livro() 
-                        # aguardar_e_limpar() # Não é mais necessário aqui, pois texto_placeholder_livro() já tem um input que pausa a tela.
                 else:
                     exibir_mensagem_e_aguardar("Número do livro inválido.")
             else:
@@ -173,7 +172,7 @@ class Admin:
 
                 if 0 <= idx_usr < len(nomes_usuarios):
                     usuario_selecionado_nome = nomes_usuarios[idx_usr]
-                    if escolha_acao == "1": # Excluir usuário
+                    if escolha_acao == "1":
                         confirmacao = input(f"Tem certeza que deseja excluir o usuário '{usuario_selecionado_nome}'? \nEsta ação é irreversível e o usuário perderá sua biblioteca! (s/n): ").strip().lower()
                         if confirmacao == 's':
                             if self.repo_usuarios.remover_usuario(usuario_selecionado_nome):
@@ -183,7 +182,7 @@ class Admin:
                         else:
                             exibir_mensagem_e_aguardar("Exclusão cancelada.")
                     
-                    elif escolha_acao == "2": # Visualizar biblioteca
+                    elif escolha_acao == "2":
                         limpar_tela()
                         print(f"--- Biblioteca de {usuario_selecionado_nome} ---")
                         biblioteca_usr: List[Livro] = self.repo_usuarios.obter_biblioteca_usuario(usuario_selecionado_nome)
@@ -200,8 +199,8 @@ class Admin:
                 exibir_mensagem_e_aguardar("Opção inválida.")
 
 
-    def menu_principal_admin(self) -> bool: # Retorna True se o admin quiser deslogar
-        """Menu principal para o administrador logado."""
+    def menu_principal_admin(self) -> bool: 
+        # Menu principal para o administrador logado.
         limpar_tela()
         while True:
             print(f"\n=== PAINEL DO ADMINISTRADOR ({self.nome}) ===")
@@ -213,7 +212,6 @@ class Admin:
             print(35*"-=")
 
             escolha = input("Opção: ").strip()
-            # limpar_tela() # Movido para dentro das opções para melhor feedback
 
             if escolha == "1":
                 limpar_tela()
@@ -232,6 +230,4 @@ class Admin:
                 sair_da_conta_mensagem()
                 return True # Deslogar
             else:
-                # limpar_tela() # Não precisa limpar aqui se a mensagem de erro for curta
                 exibir_mensagem_e_aguardar("Opção inválida, tente novamente.")
-            # Se a opção não for sair, o loop continua e a tela será limpa no início do próximo loop ou da sub-função.

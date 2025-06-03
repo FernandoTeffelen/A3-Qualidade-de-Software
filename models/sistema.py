@@ -16,9 +16,9 @@ class Sistema:
         self.usuario_logado: Optional[Usuario | Admin] = None # Python 3.10+ para |
 
     def iniciar_sessao(self):
-        """ Tenta logar ou cadastrar um usuário e direciona para o menu apropriado. """
+        # Tenta logar ou cadastrar um usuário e direciona para o menu apropriado.
         limpar_tela()
-        while True: # Loop para login/cadastro
+        while True: 
             if self.usuario_logado: # Se já estiver logado (raro cair aqui, mas por segurança)
                 self._direcionar_para_menu()
                 if not self.usuario_logado: # Se fez logout
@@ -32,7 +32,7 @@ class Sistema:
             limpar_tela()
 
             nome_usuario_sessao = None
-            if acao == '1': # Login
+            if acao == '1':
                 nome_usuario_sessao = self.servico_auth.login()
                 if nome_usuario_sessao:
                     if nome_usuario_sessao == "admin":
@@ -43,15 +43,15 @@ class Sistema:
                 else:
                     exibir_mensagem_e_aguardar("Falha no login. Tente novamente.", segundos_espera=1.5)
             
-            elif acao == '2': # Cadastro
+            elif acao == '2':
                 nome_usuario_sessao = self.servico_auth.cadastro()
                 if nome_usuario_sessao: # Cadastro bem-sucedido, loga automaticamente
-                     self.usuario_logado = Usuario(nome_usuario_sessao, self.repo_usuarios, self.repo_livros)
-                     exibir_mensagem_e_aguardar(f"Cadastro realizado! Bem-vindo(a), {nome_usuario_sessao}!", segundos_espera=1.5)
+                    self.usuario_logado = Usuario(nome_usuario_sessao, self.repo_usuarios, self.repo_livros)
+                    exibir_mensagem_e_aguardar(f"Cadastro realizado! Bem-vindo(a), {nome_usuario_sessao}!", segundos_espera=1.5)
                 else:
                     exibir_mensagem_e_aguardar("Falha no cadastro. Verifique os dados e tente novamente.", segundos_espera=1.5)
 
-            elif acao == '0': # Sair do programa
+            elif acao == '0':
                 print("Saindo do programa...")
                 aguardar_e_limpar(1)
                 break # Encerra o loop de login/cadastro e o programa
@@ -64,7 +64,7 @@ class Sistema:
 
 
     def _direcionar_para_menu(self):
-        """ Direciona para o menu do admin ou do usuário comum. """
+        # Direciona para o menu do admin ou do usuário comum.
         if not self.usuario_logado:
             return
 

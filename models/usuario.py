@@ -1,5 +1,5 @@
 # models/usuario.py
-from typing import List, Optional, TYPE_CHECKING # ADICIONADO: Optional importado
+from typing import List, Optional, TYPE_CHECKING
 from models.livro import Livro
 from utils.helpers import limpar_tela, aguardar_e_limpar, exibir_mensagem_e_aguardar, sair_da_conta_mensagem, texto_placeholder_livro
 
@@ -13,7 +13,6 @@ class Usuario:
         self.repo_usuarios = repo_usuarios
         self.repo_livros = repo_livros
         # A biblioteca pessoal é carregada sob demanda ou através de um método específico
-        # self.biblioteca_pessoal: List[Livro] = self.repo_usuarios.obter_biblioteca_usuario(self.nome)
 
     def _carregar_biblioteca_pessoal(self) -> List[Livro]:
         return self.repo_usuarios.obter_biblioteca_usuario(self.nome)
@@ -22,7 +21,7 @@ class Usuario:
         nome_antigo = self.nome
         sucesso, msg = self.repo_usuarios.alterar_dados_usuario(nome_antigo, novo_nome, nova_senha)
         if sucesso and novo_nome:
-            self.nome = novo_nome # Atualiza o nome no objeto se foi alterado
+            self.nome = novo_nome
         exibir_mensagem_e_aguardar(msg)
         return sucesso
 
@@ -65,7 +64,6 @@ class Usuario:
                 else:
                     # Isso pode acontecer se houver uma condição de corrida ou erro inesperado
                     exibir_mensagem_e_aguardar(f"Não foi possível adicionar o livro '{livro_escolhido.titulo}'.", limpar_apos=False)
-                # Atualiza a lista para o próximo loop de adição
                 self._menu_adicionar_livros_biblioteca() # Recarrega o menu
                 return # Sai da função atual para evitar loops aninhados de input
             else:
@@ -110,13 +108,13 @@ class Usuario:
 
                 if 0 <= idx_livro < len(biblioteca_pessoal):
                     livro_selecionado = biblioteca_pessoal[idx_livro]
-                    if escolha_acao == "1": # Ler livro
+                    if escolha_acao == "1":
                         limpar_tela()
                         print(f"{livro_selecionado.titulo}...\n")
                         texto_placeholder_livro() # Simula a leitura
                         aguardar_e_limpar()
                     
-                    elif escolha_acao == "2": # Remover livro
+                    elif escolha_acao == "2":
                         confirmacao = input(f"Tem certeza que deseja remover '{livro_selecionado.titulo}' da sua biblioteca? (s/n): ").strip().lower()
                         if confirmacao == 's':
                             removido = self.repo_usuarios.remover_livro_da_biblioteca_usuario(self.nome, livro_selecionado.titulo)
@@ -169,15 +167,15 @@ class Usuario:
                 
                 nova_senha_usuario = getpass("Digite a nova senha: ").strip()
                 if not nova_senha_usuario:
-                     exibir_mensagem_e_aguardar("Nova senha não pode ser vazia.")
-                     continue
+                    exibir_mensagem_e_aguardar("Nova senha não pode ser vazia.")
+                    continue
                 conf_nova_senha = getpass("Confirme a nova senha: ").strip()
                 if nova_senha_usuario != conf_nova_senha:
                     exibir_mensagem_e_aguardar("As novas senhas não coincidem.")
                     continue
                 self._salvar_alteracoes_conta(nova_senha=nova_senha_usuario)
             
-            elif escolha == "3": # Excluir conta
+            elif escolha == "3":
                 from getpass import getpass
                 print("\nATENÇÃO: Esta ação é irreversível e todos os seus dados serão perdidos.")
                 conf_nome = input(f"Digite seu nome de usuário '{self.nome}' para confirmar: ").strip()
@@ -203,7 +201,7 @@ class Usuario:
 
 
     def menu_principal_usuario(self) -> bool: # Retorna True se o usuário quiser deslogar/conta excluída
-        """Menu principal para o usuário logado."""
+        # Menu principal para o usuário logado.
         limpar_tela()
         while True:
             print(f"\nOlá {self.nome}, seja bem-vindo(a)!")
@@ -232,4 +230,4 @@ class Usuario:
                 exibir_mensagem_e_aguardar("Opção inválida, tente novamente.")
             
             if self.nome not in self.repo_usuarios.listar_todos_nomes_usuarios(): # Verifica se o usuário ainda existe (pode ter sido excluído)
-                 return True # Força logout se o usuário não existe mais
+                return True # Força logout se o usuário não existe mais

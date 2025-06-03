@@ -6,15 +6,16 @@ from models.livro import Livro
 
 class RepositorioLivros:
     def __init__(self, caminho_arquivo_livros: str = "db/livros.json"):
+        # Inicializa o repositório de livros.
         self.caminho_arquivo = caminho_arquivo_livros
         self._garantir_arquivo_existente()
         self.catalogo_livros: List[Livro] = self._carregar_livros_do_arquivo()
 
     def _garantir_arquivo_existente(self):
-        """Garante que o diretório e o arquivo de livros existam."""
+        # Garante que o diretório e o arquivo de livros existam. Cria o arquivo com dados iniciais se não existir.
         os.makedirs(os.path.dirname(self.caminho_arquivo), exist_ok=True)
         if not os.path.exists(self.caminho_arquivo):
-            # Livros iniciais baseados no db/livros.json original
+            # Livros iniciais para popular o catálogo se o arquivo não existir.
             livros_iniciais_data = [
                 {"titulo": "Dom Casmurro", "genero": "Romance"},
                 {"titulo": "1984", "genero": "Distopia"},
@@ -31,33 +32,35 @@ class RepositorioLivros:
                 json.dump(livros_iniciais_data, f, indent=4, ensure_ascii=False)
 
     def _carregar_livros_do_arquivo(self) -> List[Livro]:
-        """Carrega os livros do arquivo JSON."""
+        # Carrega os livros do arquivo JSON.
         try:
             with open(self.caminho_arquivo, "r", encoding="utf-8") as f:
                 livros_data = json.load(f)
                 return [Livro.from_dict(data) for data in livros_data]
         except (FileNotFoundError, json.JSONDecodeError):
-            return [] # Retorna lista vazia se o arquivo não existir ou for inválido
+            # Retorna lista vazia se o arquivo não existir ou for inválido,
+            # permitindo que o sistema continue funcionando e crie um novo arquivo se necessário.
+            return []
 
     def _salvar_livros_no_arquivo(self):
-        """Salva a lista atual de livros no arquivo JSON."""
+        # Salva a lista atual de livros no arquivo JSON.
         livros_data = [livro.to_dict() for livro in self.catalogo_livros]
         with open(self.caminho_arquivo, "w", encoding="utf-8") as f:
             json.dump(livros_data, f, indent=4, ensure_ascii=False)
 
     def listar_todos(self) -> List[Livro]:
-        """Retorna todos os livros do catálogo."""
+        # Retorna todos os livros do catálogo.
         return self.catalogo_livros
 
     def buscar_por_titulo(self, titulo: str) -> Optional[Livro]:
-        """Busca um livro pelo título."""
+        # Busca um livro pelo título.
         for livro in self.catalogo_livros:
             if livro.titulo == titulo:
                 return livro
         return None
 
     def adicionar_livro(self, titulo: str, genero: str) -> bool:
-        """Adiciona um novo livro ao catálogo. Retorna True se bem-sucedido."""
+        # Adiciona um novo livro ao catálogo.
         if self.buscar_por_titulo(titulo):
             return False  # Livro já existe
         novo_livro = Livro(titulo, genero)
@@ -66,12 +69,12 @@ class RepositorioLivros:
         return True
 
     def atualizar_livro(self, titulo_original: str, novo_titulo: str, novo_genero: str) -> bool:
-        """Atualiza um livro existente. Retorna True se bem-sucedido."""
+        # Atualiza os dados de um livro existente.
         livro = self.buscar_por_titulo(titulo_original)
         if not livro:
             return False # Livro não encontrado
 
-        # Verifica se o novo título já existe (e não é o próprio livro)
+        # Verifica se o novo título já existe e pertence a um livro diferente.
         if novo_titulo != titulo_original and self.buscar_por_titulo(novo_titulo):
             print(f"Erro: Já existe um livro com o título '{novo_titulo}'.")
             return False
@@ -82,7 +85,7 @@ class RepositorioLivros:
         return True
 
     def remover_livro_por_titulo(self, titulo: str) -> Optional[Livro]:
-        """Remove um livro do catálogo pelo título. Retorna o livro removido ou None."""
+        # Remove um livro do catálogo pelo título.
         livro_para_remover = self.buscar_por_titulo(titulo)
         if livro_para_remover:
             self.catalogo_livros.remove(livro_para_remover)

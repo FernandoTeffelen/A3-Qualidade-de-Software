@@ -2,7 +2,7 @@
 from models.sistema import Sistema
 
 def iniciar_aplicacao():
-    """Inicializa e executa o sistema da biblioteca."""
+    # Inicializa e executa o sistema da biblioteca.
     sistema_biblioteca = Sistema()
     sistema_biblioteca.iniciar_sessao()
     print("Programa encerrado.")

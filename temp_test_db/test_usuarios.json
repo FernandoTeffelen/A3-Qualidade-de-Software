@@ -1,0 +1,11 @@
+{
+    "usuarios": [
+        "test_user_save"
+    ],
+    "senhas": {
+        "test_user_save": "test_pass_save"
+    },
+    "bibliotecas": {
+        "test_user_save": []
+    }
+}

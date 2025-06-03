@@ -1,0 +1,11 @@
+{
+    "usuarios": [
+        "test_user"
+    ],
+    "senhas": {
+        "test_user": "test_pass"
+    },
+    "bibliotecas": {
+        "test_user": []
+    }
+}

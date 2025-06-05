@@ -1,11 +1,14 @@
 {
     "usuarios": [
-        "admin"
+        "admin",
+        "fe"
     ],
     "senhas": {
-        "admin": "admin"
+        "admin": "admin",
+        "fe": "fe"
     },
     "bibliotecas": {
-        "admin": []
+        "admin": [],
+        "fe": []
     }
 }

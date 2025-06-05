@@ -1,7 +1,7 @@
 # models/usuario.py
 from typing import List, Optional, TYPE_CHECKING
 from models.livro import Livro
-from utils.helpers import limpar_tela, aguardar_e_limpar, exibir_mensagem_e_aguardar, sair_da_conta_mensagem, texto_placeholder_livro
+from utils.helpers import limpar_tela, voltando, exibir_mensagem_e_aguardar, sair_da_conta_mensagem, texto_placeholder_livro
 
 if TYPE_CHECKING:
     from repositories.repositorio_usuarios import RepositorioUsuarios
@@ -68,7 +68,7 @@ class Usuario:
                 return # Sai da função atual para evitar loops aninhados de input
             else:
                 print("Opção inválida. Tente novamente.")
-        aguardar_e_limpar()
+        voltando()
 
 
     def _menu_gerenciar_minha_biblioteca(self):
@@ -91,7 +91,7 @@ class Usuario:
             escolha_acao = input("\nEscolha uma opção: ").strip()
 
             if escolha_acao == "0":
-                aguardar_e_limpar()
+                voltando()
                 break
             
             if not biblioteca_pessoal and escolha_acao in ["1", "2"]:
@@ -112,7 +112,7 @@ class Usuario:
                         limpar_tela()
                         print(f"{livro_selecionado.titulo}...\n")
                         texto_placeholder_livro() # Simula a leitura
-                        aguardar_e_limpar()
+                        voltando()
                     
                     elif escolha_acao == "2":
                         confirmacao = input(f"Tem certeza que deseja remover '{livro_selecionado.titulo}' da sua biblioteca? (s/n): ").strip().lower()
@@ -144,7 +144,7 @@ class Usuario:
             nova_senha_usuario = None
 
             if escolha == "0":
-                aguardar_e_limpar()
+                voltando()
                 break
             elif escolha == "1":
                 novo_nome_usuario = input("Digite o novo nome de usuário: ").strip()

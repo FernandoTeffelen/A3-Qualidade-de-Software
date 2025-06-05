@@ -1,12 +1,13 @@
 # models/sistema.py
 from typing import Optional
+import time
 
 from repositories.repositorio_livros import RepositorioLivros
 from repositories.repositorio_usuarios import RepositorioUsuarios
 from services.autenticacao import ServicoAutenticacao
 from models.usuario import Usuario
 from models.admin import Admin
-from utils.helpers import limpar_tela, aguardar_e_limpar, exibir_mensagem_e_aguardar
+from utils.helpers import limpar_tela, voltando, exibir_mensagem_e_aguardar
 
 class Sistema:
     def __init__(self):
@@ -52,10 +53,21 @@ class Sistema:
                     exibir_mensagem_e_aguardar("Falha no cadastro. Verifique os dados e tente novamente.", segundos_espera=1.5)
 
             elif acao == '0':
-                print("Saindo do programa...")
-                aguardar_e_limpar(1)
+                i = 0
+                while i < 2:
+                    print('Saindo do programa', end='\r')
+                    time.sleep(0.5)
+                    print('Saindo do programa.', end='\r')
+                    time.sleep(0.5)
+                    print('Saindo do programa..', end='\r')
+                    time.sleep(0.5)
+                    print('Saindo do programa...', end='\r')
+                    time.sleep(1)
+                    limpar_tela()
+                    i += 1
+                time.sleep(1)
+                limpar_tela()
                 break # Encerra o loop de login/cadastro e o programa
-            
             else:
                 exibir_mensagem_e_aguardar("Opção inválida.", segundos_espera=1.5)
 
@@ -78,4 +90,5 @@ class Sistema:
             self.usuario_logado = None # Efetua o logout
             limpar_tela()
             print("Você foi desconectado.")
-            aguardar_e_limpar(1.5)
+            time.sleep(1.5)
+            limpar_tela()

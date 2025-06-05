@@ -1,7 +1,7 @@
 # models/admin.py
 from typing import TYPE_CHECKING, List, Optional
 from models.livro import Livro
-from utils.helpers import limpar_tela, aguardar_e_limpar, exibir_mensagem_e_aguardar, sair_da_conta_mensagem, texto_placeholder_livro
+from utils.helpers import limpar_tela, voltando, exibir_mensagem_e_aguardar, sair_da_conta_mensagem, texto_placeholder_livro
 
 if TYPE_CHECKING:
     from repositories.repositorio_usuarios import RepositorioUsuarios
@@ -38,7 +38,7 @@ class Admin:
             if continuar != 's':
                 break
             limpar_tela()
-        aguardar_e_limpar()
+        voltando()
 
     def _menu_alterar_livro_catalogo(self):
         limpar_tela()
@@ -54,7 +54,7 @@ class Admin:
         try:
             pos_str = input("\nDigite o número do livro que deseja alterar (ou qualquer letra para voltar): ").strip()
             if not pos_str.isdigit():
-                aguardar_e_limpar()
+                voltando()
                 return
                 
             posicao = int(pos_str) - 1
@@ -77,7 +77,7 @@ class Admin:
                 exibir_mensagem_e_aguardar("Posição inválida.")
         except ValueError:
             exibir_mensagem_e_aguardar("Entrada inválida.")
-        aguardar_e_limpar(segundos=0.1) # Pequeno delay para a msg do input ser vista se for o caso
+        voltando(segundos=0.1) # Pequeno delay para a msg do input ser vista se for o caso
 
     def _menu_gerenciar_livros_cadastrados(self):
         while True:
@@ -98,7 +98,7 @@ class Admin:
             escolha_acao = input("\nEscolha uma opção: ").strip()
 
             if escolha_acao == "0":
-                aguardar_e_limpar()
+                voltando()
                 break
             
             if not livros_catalogo and escolha_acao in ["1", "2"]:
@@ -156,7 +156,7 @@ class Admin:
 
             escolha_acao = input("\nEscolha uma opção: ").strip()
             if escolha_acao == "0":
-                aguardar_e_limpar()
+                voltando()
                 break
 
             if not nomes_usuarios and escolha_acao in ["1", "2"]:
@@ -192,7 +192,7 @@ class Admin:
                             for i, livro_usr in enumerate(biblioteca_usr, 1):
                                 print(f"{i}. {livro_usr.titulo} - {livro_usr.genero}")
                         input("\nPressione qualquer tecla para voltar ao menu de usuários...")
-                        aguardar_e_limpar(segundos=0.1)
+                        voltando(segundos=0.1)
                 else:
                     exibir_mensagem_e_aguardar("Número do usuário inválido.")
             else:

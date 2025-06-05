@@ -5,8 +5,16 @@ import time
 def limpar_tela():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def aguardar_e_limpar(segundos=1):
+def voltando(segundos=0.5):
+    os.system('cls')
+    print('Voltando', end='\r')
     time.sleep(segundos)
+    print('Voltando.', end='\r')
+    time.sleep(segundos)
+    print('Voltando..', end='\r')
+    time.sleep(segundos)
+    print('Voltando...')
+    time.sleep(1)
     limpar_tela()
 
 def exibir_mensagem_e_aguardar(mensagem, segundos_espera=2, limpar_apos=True):
@@ -18,8 +26,15 @@ def exibir_mensagem_e_aguardar(mensagem, segundos_espera=2, limpar_apos=True):
 
 def sair_da_conta_mensagem():
     # Exibe mensagem de logout.
-    print("Saindo da conta...")
-    aguardar_e_limpar(1)
+    print('Saindo', end='\r')
+    time.sleep(0.5)
+    print('Saindo.', end='\r')
+    time.sleep(0.5)
+    print('Saindo..', end='\r')
+    time.sleep(0.5)
+    print('Saindo...')
+    time.sleep(1)
+    limpar_tela()
 
 def texto_placeholder_livro():
     print()

@@ -31,6 +31,7 @@ class ServicoAutenticacao:
             print("Usuário já existe.")
             return None
         
+        print("\nATENÇÃO: Sua senha ficara oculta para sua segurança.")
         senha_input = getpass("Escolha uma senha: ").strip()
         if not senha_input:
             print("Senha não pode ser vazia.")

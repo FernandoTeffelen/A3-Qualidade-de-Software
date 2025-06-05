@@ -1,6 +1,7 @@
 #MEU GITIGNORE
 git.txt
 backup-livros.json
+legado/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
